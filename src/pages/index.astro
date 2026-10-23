@@ -1,0 +1,32 @@
+---
+import Island from "../components/Island.astro";
+---
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Server island fetch failure</title>
+    <link rel="icon" href="data:," />
+  </head>
+  <body>
+    <h1>Server island: rejected fetch is uncaught</h1>
+    <p>
+      Load this page with <code>?offline</code> to make every request to
+      <code>/_server-islands/</code> reject, standing in for a lost connection.
+      Alternatively block <code>_server-islands</code> in DevTools → Network.
+      Expected: the fallback stays and nothing is thrown.
+      Actual: an uncaught <code>TypeError</code> in the console.
+    </p>
+    <script is:inline>
+      if (location.search.includes("offline")) {
+        const realFetch = window.fetch;
+        window.fetch = (input, init) =>
+          String(input).includes("/_server-islands/")
+            ? Promise.reject(new TypeError("Failed to fetch"))
+            : realFetch(input, init);
+      }
+    </script>
+    <Island server:defer>
+      <p id="fallback" slot="fallback">Loading…</p>
+    </Island>
+  </body>
+</html>
